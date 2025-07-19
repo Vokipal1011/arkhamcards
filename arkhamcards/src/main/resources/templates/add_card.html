@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить карту</title>
+    <style>
+        .container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        #drop-zone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            color: #888;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        #drop-zone.dragover {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        #preview img {
+            width: 400px;
+            max-width: 100%;
+            border: 2px solid black;
+        }
+
+        #card-data {
+            margin-top: 20px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .form-column {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .preview-column {
+            flex: 1;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h1>Добавить карту контакта</h1>
+
+<form th:action="@{/cards/add}" method="post" enctype="multipart/form-data">
+    <div class="container">
+        <div class="form-column">
+            <div id="drop-zone">
+                Перетащи сюда изображение карты или нажми для выбора файла
+                <input type="file" id="image" name="image" accept=".png" required>
+            </div>
+
+            <div id="card-data" style="display:none;">
+                <label>Источник (база или дополнение):</label><br>
+                <select name="source" required>
+                    <option value="Base">База</option>
+                    <option value="KingInYellow">Король в жёлтом</option>
+                </select><br><br>
+
+                <label>Тип карты:</label><br>
+                <select name="type" required onchange="updateSubtypes()">
+                    <option value="MYTH">Миф</option>
+                    <option value="ARKHAM">Контакт в Аркхэме</option>
+                    <option value="OTHER_WORLD">Контакт в ином мире</option>
+                </select><br><br>
+
+                <label id="subtype-label">Подтип:</label><br>
+                <select name="subtype" id="subtype"></select><br><br>
+
+                <label>Наименование:</label><br>
+                <input type="text" name="title" required><br><br>
+
+                <label>Важный аспект:</label><br>
+                <input type="text" name="aspect"><br><br>
+
+                <button type="submit">Сохранить карту</button>
+            </div>
+        </div>
+
+        <div class="preview-column">
+            <div id="preview" style="display:none;">
+                <strong>Предпросмотр карты:</strong><br>
+                <img id="preview-img" src="">
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    const dropZone = document.getElementById("drop-zone");
+    const inputFile = document.getElementById("image");
+
+    dropZone.addEventListener("click", () => inputFile.click());
+
+    dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === "image/png") {
+            inputFile.files = e.dataTransfer.files;
+            handleFile(file);
+        } else {
+            alert("Пожалуйста, перетащите Png-файл.");
+        }
+    });
+
+    inputFile.addEventListener("change", () => {
+        const file = inputFile.files[0];
+        if (file) {
+            handleFile(file);
+        }
+    });
+
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("preview-img").src = e.target.result;
+            document.getElementById("preview").style.display = "block";
+            document.getElementById("card-data").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function updateSubtypes() {
+        const type = document.querySelector('[name="type"]').value;
+        const subtypeSelect = document.getElementById("subtype");
+        const subtypeLabel = document.getElementById("subtype-label");
+
+        subtypeSelect.innerHTML = "";
+
+        if (type === "MYTH") {
+            subtypeLabel.style.display = "block";
+            subtypeSelect.style.display = "block";
+            ["Слухи", "Процесс", "Заголовок"].forEach(value => {
+                const option = new Option(value, value);
+                subtypeSelect.add(option);
+            });
+        } else if (type === "ARKHAM") {
+            subtypeLabel.style.display = "block";
+            subtypeSelect.style.display = "block";
+            [
+                "Нортсайд", "Даунтаун", "Исттаун", "Торговый район",
+                "Ривертаун", "Университет Мискатоника", "Фрэнч-Хилл",
+                "Аптаун", "Саутсайд"
+            ].forEach(value => {
+                const option = new Option(value, value);
+                subtypeSelect.add(option);
+            });
+        } else {
+            subtypeLabel.style.display = "none";
+            subtypeSelect.style.display = "none";
+        }
+    }
+
+    window.addEventListener("DOMContentLoaded", updateSubtypes);
+</script>
+</body>
+</html>

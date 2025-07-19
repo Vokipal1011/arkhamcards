@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать карту</title>
+</head>
+<body>
+<h1>Редактировать карту</h1>
+
+<form th:action="@{'/cards/edit/' + ${card.id}}" method="post" enctype="multipart/form-data">
+    <label>Источник:</label>
+    <select name="source">
+        <option th:each="src : ${T(com.arkham.arkhamcards.CardSource).values()}"
+                th:value="${src}" th:text="${src}" th:selected="${src == card.source}"></option>
+    </select><br>
+
+    <label>Тип:</label>
+    <select name="type">
+        <option th:each="t : ${T(com.arkham.arkhamcards.CardType).values()}"
+                th:value="${t}" th:text="${t}" th:selected="${t == card.type}"></option>
+    </select><br>
+
+    <label>Подтип:</label>
+    <input type="text" name="subtype" th:value="${card.subtype}" required/><br>
+
+    <label>Название:</label>
+    <input type="text" name="title" th:value="${card.title}" required/><br>
+
+    <label>Аспект:</label>
+    <input type="text" name="aspect" th:value="${card.aspect}"/><br>
+
+    <label>Новое изображение (если нужно):</label>
+    <input type="file" name="image"/><br>
+
+    <button type="submit">Сохранить</button>
+</form>
+
+<p><a href="/cards">← Назад к каталогу</a></p>
+
+</body>
+</html>

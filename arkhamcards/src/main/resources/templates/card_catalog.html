@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог карт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .filter-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .filter-panel select,
+        .filter-panel button {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .card-item {
+            border: 1px solid #ccc;
+            padding: 15px;
+            width: 200px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .card-item img {
+            height: 300px;
+        }
+
+        .card-actions {
+            margin-top: 10px;
+        }
+
+        .card-actions a {
+            margin: 0 5px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Каталог карт</h1>
+
+<form method="get" action="/cards" class="filter-panel">
+    <label>Тип:
+        <select name="type">
+            <option th:attr="value=''" th:selected="${type == null}">-- все --</option>
+            <option th:each="t : ${T(com.arkham.arkhamcards.CardType).values()}"
+                    th:value="${t}" th:text="${t}" th:selected="${type == t}"></option>
+        </select>
+    </label>
+
+    <label>Источник:
+        <select name="source">
+            <option th:attr="value=''" th:selected="${source == null}">-- все --</option>
+            <option th:each="s : ${T(com.arkham.arkhamcards.CardSource).values()}"
+                    th:value="${s}" th:text="${s}" th:selected="${source == s}"></option>
+        </select>
+    </label>
+
+    <button type="submit">Фильтровать</button>
+</form>
+
+<div class="card-grid">
+    <div th:if="${cards.isEmpty()}">
+        <p>Нет добавленных карт.</p>
+    </div>
+
+    <div th:each="card : ${cards}" class="card-item">
+        <img th:src="@{'/cards/images/' + ${card.imagePath}}" alt="card image"/><br>
+        <strong>Название:</strong> <span th:text="${card.title}"></span><br>
+        <strong>Тип:</strong> <span th:text="${card.type}"></span><br>
+        <strong>Подтип:</strong> <span th:text="${card.subtype}"></span><br>
+        <strong>Источник:</strong> <span th:text="${card.source}"></span><br>
+        <strong>Аспект:</strong> <span th:text="${card.aspect}"></span><br>
+
+        <div class="card-actions">
+            <a th:href="@{'/cards/edit/' + ${card.id}}">✏️ Редактировать</a>
+            <a th:href="@{'/cards/delete/' + ${card.id}}"
+               onclick="return confirm('Удалить эту карту?')">❌ Удалить</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
